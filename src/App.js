@@ -9,26 +9,24 @@ function App() {
     .toISOString()
     .substring(0, 10);
 
-  const [name, setName] = useState('');
-  const [bookingDate, setBookingDate] = useState(todayDate);
-  const [numPeople, setNumPeople] = useState();
-  const [tel, setTel] = useState('');
-
-  const allergyOptions = ['peanuts', 'seafood', 'other'];
-  const [allergies, setAllergies] = useState(
-    new Array(allergyOptions.length).fill(false)
-  );
-
-  const handleCheckboxChange = (position) => {
-    const updatedCheckedState = allergies.map((item, index) =>
-      index === position ? !item : item
-    );
-    setAllergies(updatedCheckedState);
-  };
+  const [formState, setFormState] = useState({
+    name: '',
+    date: todayDate,
+    numPeople: 1,
+    telephone: '',
+    allergies: {
+      nuts: false,
+      seafood: false,
+      other: false,
+      specify: '',
+    },
+    requirements: 'none',
+    comments: '',
+  });
 
   const submitHandler = (e) => {
     e.preventDefault();
-    console.log(name, bookingDate);
+    // console.log(name, bookingDate);
   };
 
   return (
@@ -42,10 +40,8 @@ function App() {
             type="text"
             name="name"
             id="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            min={todayDate}
-            max={dateMax}
+            value={formState.name}
+            onChange={(e) => setFormState({ name: e.target.value })}
           />
         </div>
         {/* <!-- Date --> */}
@@ -55,8 +51,10 @@ function App() {
             type="date"
             name="booking-date"
             id="booking-date"
-            value={bookingDate}
-            onChange={(e) => setBookingDate(e.target.value)}
+            value={formState.date}
+            onChange={(e) => setFormState({ date: e.target.value })}
+            min={todayDate}
+            max={dateMax}
           />
         </div>
         {/* <!-- Number of people --> */}
@@ -65,8 +63,8 @@ function App() {
           <select
             name="numPeople"
             id="numPeople"
-            value={numPeople}
-            onChange={(e) => setNumPeople(e.target.value)}
+            value={formState.numPeople}
+            onChange={(e) => setFormState({ numPeople: e.target.value })}
           >
             <option value="1">1</option>
             <option value="2">2</option>
@@ -88,57 +86,91 @@ function App() {
             type="tel"
             name="telephone"
             id="telephone"
-            value={tel}
-            onChange={(e) => setTel(e.target.value)}
+            value={formState.telephone}
+            onChange={(e) => setFormState({ telephone: e.target.value })}
           />
         </div>
         {/* <!-- Allergies --> */}
         <div className="form-group">
           <fieldset>
             <legend>Allergies</legend>
-            {allergyOptions.map((option, i) => {
-              return (
-                <div key={`option-${i}`}>
-                  <label htmlFor="{option}">{option.toUpperCase()}</label>
-                  <input
-                    type="checkbox"
-                    name="allergies"
-                    id={option}
-                    value={option}
-                    checked={allergies[i]}
-                    onChange={() => handleCheckboxChange(i)}
-                  />
-                </div>
-              );
-            })}
+
+            <label htmlFor="nuts">Nuts</label>
+            <input
+              type="checkbox"
+              name="allergies"
+              id="nuts"
+              value="nuts"
+              onChange={(e) =>
+                setFormState({ allergies: { nuts: e.target.checked } })
+              }
+            />
+            <label htmlFor="seafood">Seafood</label>
+            <input
+              type="checkbox"
+              name="allergies"
+              id="seafood"
+              value="seafood"
+              onChange={(e) =>
+                setFormState({ allergies: { seafood: e.target.checked } })
+              }
+            />
+            <label htmlFor="otherd">Other</label>
+            <input
+              type="checkbox"
+              name="allergies"
+              id="other"
+              value="other"
+              onChange={(e) =>
+                setFormState({ allergies: { other: e.target.checked } })
+              }
+            />
+
+            <label htmlFor="specify">(Please Specify)</label>
+            <textarea
+              name="specify"
+              id="specify"
+              cols="30"
+              rows="1"
+              disabled={!formState.allergies.other === true}
+              onChange={(e) =>
+                setFormState({ allergies: { specify: e.target.value } })
+              }
+            ></textarea>
           </fieldset>
         </div>
-        {/* <!-- Vegan --> */}
-        <div className="form-group">
-          <label htmlFor="vegan">Vegan</label>
-          <input type="checkbox" name="vegan" id="" value="vegan" />
-        </div>
-        {/* <!-- Inside / Outside --> */}
-        <div className="form-group">
-          <fieldset>
-            <legend>Would you like to sit inside or outside?</legend>
-            <label htmlFor="location-inside">Inside</label>
+        {/* <!-- Dietary requirements --> */}
+        <fieldset>
+          <legend>Dietary requirements</legend>
+          <div className="form-group">
+            <label htmlFor="requirements-none">None</label>
             <input
               type="radio"
-              name="location"
-              id="location-inside"
-              value="inside"
-              checked
+              name="requirements"
+              id=""
+              value={formState.requirements}
+              onChange={(e) => setFormState({ requirements: e.target.value })}
             />
-            <label htmlFor="loaction-outside">Outside</label>
+            <label htmlFor="requirements-vegetarian">Vegetarian</label>
             <input
               type="radio"
-              name="location"
-              id="location-outside"
-              value="ouside"
+              name="requirements"
+              id=""
+              value={formState.requirements}
+              // checked={formState.requirements === 'vegetarian'}
+              onChange={(e) => setFormState({ requirements: e.target.value })}
             />
-          </fieldset>
-        </div>
+            <label htmlFor="requirements-vegan">Vegan</label>
+            <input
+              type="radio"
+              name="requirements"
+              id=""
+              value={formState.requirements}
+              // checked={formState.requirements === 'vegan'}
+              onChange={(e) => setFormState({ requirements: e.target.value })}
+            />
+          </div>
+        </fieldset>
         {/* <!-- Comments --> */}
         <div className="form-group">
           <label htmlFor="comments">Additional comments</label>
@@ -147,6 +179,7 @@ function App() {
             id="comments"
             cols="30"
             rows="10"
+            onChange={(e) => setFormState({ comments: e.target.value })}
           ></textarea>
         </div>
         {/* <!-- Submit --> */}
